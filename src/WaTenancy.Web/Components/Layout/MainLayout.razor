@@ -1,0 +1,26 @@
+﻿@inherits LayoutComponentBase
+
+<div class="app-shell">
+    <aside class="sidebar">
+        <a class="brand" href="/"><span class="brand-mark">w<span>·</span></span><span>WaTenancy<small>WHATSAPP WORKSPACE</small></span></a>
+        <div class="sidebar-label">WORKSPACE</div>
+        <nav aria-label="Main navigation">
+            <NavLink href="/" Match="NavLinkMatch.All"><span class="nav-symbol">▦</span> Overview &amp; companies</NavLink>
+            <NavLink href="/users"><span class="nav-symbol">♧</span> Platform users</NavLink>
+            <NavLink href="/profile"><span class="nav-symbol">◎</span> My profile</NavLink>
+            <NavLink href="/api-guide"><span class="nav-symbol">⌘</span> API &amp; webhooks</NavLink>
+        </nav>
+        <div class="sidebar-note"><span class="live-dot"></span> Every number. Its own connection.<p>Manage your companies’ WhatsApp conversations in one place.</p></div>
+        <AuthorizeView><Authorized Context="auth">
+            <div class="signed-user"><span class="avatar">@(auth.User.Identity?.Name?[..1].ToUpperInvariant() ?? "U")</span><div><strong>@auth.User.Identity?.Name</strong><small>Your workspace</small></div></div>
+            <form action="/auth/logout" method="post" data-enhance="false"><AntiforgeryToken /><button class="sign-out" type="submit">Sign out ↗</button></form>
+        </Authorized></AuthorizeView>
+    </aside>
+    <main class="main-content">@Body</main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>

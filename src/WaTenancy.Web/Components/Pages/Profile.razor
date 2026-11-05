@@ -1,0 +1,19 @@
+@page "/profile"
+@attribute [Authorize]
+@inject AuthenticationStateProvider Auth
+@inject UserService Users
+@inject NavigationManager Navigation
+<PageTitle>My profile · WaTenancy</PageTitle>
+<div class="eyebrow">YOUR ACCOUNT</div><h1>My profile</h1><p class="muted">Keep your workspace account secure.</p>
+@if (error is not null) { <div class="notice error" role="alert">@error</div> }
+<section class="panel narrow"><h2>Change password</h2><p class="muted">Changing your password signs out your existing sessions.</p><EditForm Model="model" OnValidSubmit="Change" FormName="password"><DataAnnotationsValidator /><ValidationSummary />
+<label>Current password<InputText type="password" @bind-Value="model.Current" autocomplete="current-password" /></label><label>New password<InputText type="password" @bind-Value="model.Next" autocomplete="new-password" /></label><label>Confirm new password<InputText type="password" @bind-Value="model.Confirm" autocomplete="new-password" /></label><button class="button primary" disabled="@busy">Change password</button></EditForm></section>
+@code {
+    private PasswordModel model = new(); private bool busy; private string? error;
+    private async Task Change() { busy = true; error = null; try { if (model.Next != model.Confirm) throw new AppException(400, "Passwords must match."); await Users.ChangePassword((await Auth.GetAuthenticationStateAsync()).User, model.Current, model.Next); Navigation.NavigateTo("/login", true); } catch (AppException ex) { error = ex.Message; } finally { busy = false; } }
+    private sealed class PasswordModel {
+        [System.ComponentModel.DataAnnotations.Required] public string Current { get; set; } = "";
+        [System.ComponentModel.DataAnnotations.Required, System.ComponentModel.DataAnnotations.MinLength(12)] public string Next { get; set; } = "";
+        [System.ComponentModel.DataAnnotations.Required] public string Confirm { get; set; } = "";
+    }
+}

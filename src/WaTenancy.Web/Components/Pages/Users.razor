@@ -1,0 +1,18 @@
+@page "/users"
+@attribute [Authorize]
+@inject AuthenticationStateProvider Auth
+@inject UserService UsersService
+@inject TenantAccess Access
+<PageTitle>Platform users · WaTenancy</PageTitle>
+<div class="eyebrow">PLATFORM ADMINISTRATION</div><h1>People &amp; access</h1><p class="muted">Create company users from the Team tab within a company. Manage their global access here.</p>
+@if (error is not null) { <div class="notice error">@error</div> }
+@if (allowed) {
+<section class="panel"><div class="section-heading"><h2>Workspace users</h2><span class="pill">@users.Count users</span></div><div class="table-wrap"><table><thead><tr><th>User</th><th>Access</th><th>Status</th><th></th></tr></thead><tbody>@foreach (var user in users) { <tr><td><strong>@user.Email</strong></td><td>@(user.PlatformAdmin ? "Platform administrator" : "Company memberships")</td><td><span class="status @(user.Enabled ? "connected" : "paused")">@(user.Enabled ? "Enabled" : "Disabled")</span></td><td class="actions"><button class="button small" disabled="@busy" @onclick="() => Toggle(user)">@(user.Enabled ? "Disable" : "Enable")</button><button class="button small" @onclick="() => resetUser = user">Reset password</button></td></tr> }</tbody></table></div></section>
+@if (resetUser is not null) { <section class="panel narrow"><h2>Reset password for @resetUser.Email</h2><label>New password<input type="password" @bind="password" autocomplete="new-password" /></label><p class="muted">Existing sessions will expire. Share the new password privately.</p><button class="button primary" disabled="@busy" @onclick="Reset">Reset password</button><button class="button" @onclick="() => resetUser = null">Cancel</button></section> }
+}
+@code {
+    private List<UserView> users = []; private bool allowed, busy; private string? error; private UserView? resetUser; private string password = "";
+    protected override async Task OnInitializedAsync() { var p = (await Auth.GetAuthenticationStateAsync()).User; allowed = await Access.IsPlatformAdmin(p); if (!allowed) { error = "This page is for platform administrators."; return; } users = await UsersService.List(p); }
+    private async Task Toggle(UserView user) { busy = true; error = null; try { var p = (await Auth.GetAuthenticationStateAsync()).User; await UsersService.SetEnabled(p, user.Id, !user.Enabled); users = await UsersService.List(p); } catch (AppException ex) { error = ex.Message; } finally { busy = false; } }
+    private async Task Reset() { if (resetUser is null) return; busy = true; error = null; try { await UsersService.ResetPassword((await Auth.GetAuthenticationStateAsync()).User, resetUser.Id, password); resetUser = null; password = ""; } catch (AppException ex) { error = ex.Message; } finally { busy = false; } }
+}

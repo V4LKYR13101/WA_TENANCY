@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "WebhookReceiver": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://127.0.0.1:5190"
+    }
+  }
+}

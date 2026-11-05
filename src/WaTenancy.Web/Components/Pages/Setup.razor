@@ -1,0 +1,17 @@
+@page "/setup"
+@attribute [AllowAnonymous]
+@attribute [ExcludeFromInteractiveRouting]
+@layout AuthLayout
+@inject IDbContextFactory<AppDbContext> Factory
+@inject NavigationManager Navigation
+<PageTitle>Set up · WaTenancy</PageTitle>
+<div class="auth-form"><div class="eyebrow">LET’S GET STARTED</div><h1>Create your administrator</h1><p class="muted">This account manages companies and user access. Setup is available only on this server’s local connection.</p>
+@if (Error is not null) { <div class="notice error" role="alert">@(Error == "match" ? "Passwords must match." : Error == "email" ? "Enter a valid email address." : "Use at least 12 characters with uppercase, lowercase, a number and a symbol.")</div> }
+<form method="post" action="/auth/setup" data-enhance="false"><AntiforgeryToken />
+<label>Administrator email<input type="email" name="email" autocomplete="username" required maxlength="254" /></label>
+<label>Password<input type="password" name="password" minlength="12" autocomplete="new-password" required /><small>12+ characters, uppercase, lowercase, a number and a symbol.</small></label>
+<label>Confirm password<input type="password" name="confirmPassword" minlength="12" autocomplete="new-password" required /></label><button class="button primary full" type="submit">Create administrator →</button></form></div>
+@code {
+    [SupplyParameterFromQuery] public string? Error { get; set; }
+    protected override async Task OnInitializedAsync() { await using var db = await Factory.CreateDbContextAsync(); if (await db.Users.AnyAsync()) Navigation.NavigateTo("/login", true); }
+}

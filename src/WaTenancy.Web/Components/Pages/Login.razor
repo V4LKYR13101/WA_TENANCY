@@ -1,0 +1,18 @@
+@page "/login"
+@attribute [AllowAnonymous]
+@attribute [ExcludeFromInteractiveRouting]
+@layout AuthLayout
+@inject IDbContextFactory<AppDbContext> Factory
+@inject NavigationManager Navigation
+<PageTitle>Sign in · WaTenancy</PageTitle>
+<div class="auth-form"><div class="eyebrow">WELCOME BACK</div><h1>Sign in to your workspace</h1><p class="muted">Use the account your company administrator provided.</p>
+@if (Error is not null) { <div class="notice error" role="alert">The email or password is incorrect, or the account is locked or disabled.</div> }
+<form method="post" action="/auth/login" data-enhance="false"><AntiforgeryToken /><input type="hidden" name="returnUrl" value="@ReturnUrl" />
+<label>Email address<input type="email" name="email" autocomplete="username" placeholder="you@company.com" required maxlength="254" /></label>
+<label>Password<input type="password" name="password" autocomplete="current-password" required /></label><button class="button primary full" type="submit">Sign in →</button></form>
+<p class="fine-print">Need access or a password reset? Contact your administrator.</p></div>
+@code {
+    [SupplyParameterFromQuery] public string? Error { get; set; }
+    [SupplyParameterFromQuery] public string? ReturnUrl { get; set; }
+    protected override async Task OnInitializedAsync() { await using var db = await Factory.CreateDbContextAsync(); if (!await db.Users.AnyAsync()) Navigation.NavigateTo("/setup", true); }
+}
